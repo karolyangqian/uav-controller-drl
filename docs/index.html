@@ -483,6 +483,60 @@
       line-height: 1.6;
     }
 
+    /* Reference List */
+    .reference-list {
+      list-style: none;
+      padding: 0;
+      margin: 1.5rem 0;
+      display: flex;
+      flex-direction: column;
+      gap: 1rem;
+    }
+    .reference-item {
+      padding: 1.25rem;
+      background: #ffffff;
+      border: 1px solid var(--border-color);
+      border-radius: 8px;
+      transition: border-color 0.2s ease, box-shadow 0.2s ease;
+    }
+    .reference-item:hover {
+      border-color: #cbd5e1;
+      box-shadow: 0 4px 12px rgba(0, 0, 0, 0.04);
+    }
+    .reference-title {
+      font-family: var(--font-heading);
+      font-weight: 700;
+      font-size: 1.05rem;
+      color: #111827;
+      margin-bottom: 0.35rem;
+    }
+    .reference-authors {
+      font-family: var(--font-heading);
+      font-size: 0.92rem;
+      color: #4b5563;
+      margin-bottom: 0.4rem;
+    }
+    .reference-meta {
+      font-family: var(--font-heading);
+      font-size: 0.88rem;
+      color: #6b7280;
+      display: flex;
+      flex-wrap: wrap;
+      align-items: center;
+      gap: 0.75rem;
+    }
+    .reference-link {
+      display: inline-flex;
+      align-items: center;
+      gap: 0.25rem;
+      color: #2563eb;
+      font-weight: 600;
+      text-decoration: none;
+    }
+    .reference-link:hover {
+      text-decoration: underline;
+    }
+
     /* Footer */
     footer {
       border-top: 1px solid var(--border-color);
@@ -925,6 +979,101 @@
     <p style="margin-top: 1rem; font-size: 0.95rem;">
       📖 For physical hardware setup instructions on the AMD Kria KR260, see the <a href="HIL_DEPLOYMENT_GUIDE.md" style="color: #2563eb; text-decoration: underline;" target="_blank">HIL Deployment & Networking Guide</a>.
     </p>
+  </section>
+
+  <!-- Key References Section -->
+  <section id="references">
+    <h2 class="section-title">Key Literature & Foundational References</h2>
+    <p style="font-size: 1.05rem; color: #4b5563; margin-bottom: 1.5rem;">
+      The methodology, cascaded control hierarchy, domain randomization, fixed-point quantization, and FPGA hardware acceleration in this project build upon the following research literature:
+    </p>
+
+    <ul class="reference-list">
+      <li class="reference-item">
+        <div class="reference-title">
+          1. Control of a Quadrotor with Reinforcement Learning
+        </div>
+        <div class="reference-authors">
+          Jemin Hwangbo, Inkyu Sa, Roland Siegwart, and Marco Hutter
+        </div>
+        <div class="reference-meta">
+          <span><em>IEEE Robotics and Automation Letters (RA-L)</em>, 2(4):2096–2103, 2017</span>
+          <span class="pill">Sub-µs Execution</span>
+          <a class="reference-link" href="https://arxiv.org/abs/1707.05110" target="_blank">
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6"></path><polyline points="15 3 21 3 21 9"></polyline><line x1="10" y1="14" x2="21" y2="3"></line></svg>
+            arXiv:1707.05110
+          </a>
+        </div>
+      </li>
+
+      <li class="reference-item">
+        <div class="reference-title">
+          2. Reinforcement Learning for UAV Attitude Control
+        </div>
+        <div class="reference-authors">
+          William Koch, Renato Mancuso, Richard West, and Azer Bestavros
+        </div>
+        <div class="reference-meta">
+          <span><em>ACM Transactions on Cyber-Physical Systems (TCPS)</em>, 3(2):1–27, 2019</span>
+          <span class="pill">Inner/Outer Loop & PPO vs PID</span>
+          <a class="reference-link" href="https://arxiv.org/abs/1804.04154" target="_blank">
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6"></path><polyline points="15 3 21 3 21 9"></polyline><line x1="10" y1="14" x2="21" y2="3"></line></svg>
+            arXiv:1804.04154
+          </a>
+        </div>
+      </li>
+
+      <li class="reference-item">
+        <div class="reference-title">
+          3. Sim-to-(Multi)-Real: Transfer of Low-Level Robust Control Policies to Multiple Quadrotors
+        </div>
+        <div class="reference-authors">
+          Artem Molchanov, Tao Chen, Wolfgang Hönig, James A. Preiss, Nora Ayanian, and Gaurav S. Sukhatme
+        </div>
+        <div class="reference-meta">
+          <span><em>IEEE/RSJ International Conference on Intelligent Robots and Systems (IROS)</em>, 2019</span>
+          <span class="pill">Sim-to-Real Domain Randomization</span>
+          <a class="reference-link" href="https://arxiv.org/abs/1903.04628" target="_blank">
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6"></path><polyline points="15 3 21 3 21 9"></polyline><line x1="10" y1="14" x2="21" y2="3"></line></svg>
+            arXiv:1903.04628
+          </a>
+        </div>
+      </li>
+
+      <li class="reference-item">
+        <div class="reference-title">
+          4. Learning Quantized Continuous Controllers for Integer Hardware
+        </div>
+        <div class="reference-authors">
+          Fabian Kresse and Christoph H. Lampert
+        </div>
+        <div class="reference-meta">
+          <span><em>8th Annual Learning for Dynamics and Control Conference (L4DC)</em>, PMLR 331, 2026</span>
+          <span class="pill">Fixed-Point Quantization & FPGA</span>
+          <a class="reference-link" href="https://arxiv.org/abs/2511.07046" target="_blank">
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6"></path><polyline points="15 3 21 3 21 9"></polyline><line x1="10" y1="14" x2="21" y2="3"></line></svg>
+            arXiv:2511.07046
+          </a>
+        </div>
+      </li>
+
+      <li class="reference-item">
+        <div class="reference-title">
+          5. FPGA-Based Neural Thrust Controller for UAVs
+        </div>
+        <div class="reference-authors">
+          Sharif Azem, David Scheunert, Mengguang Li, Jonas Gehrunger, Kai Cui, Christian Hochberger, and Heinz Koeppl
+        </div>
+        <div class="reference-meta">
+          <span><em>Preprint</em>, Systems & Control, 2024</span>
+          <span class="pill">FPGA Hardware Acceleration</span>
+          <a class="reference-link" href="https://arxiv.org/abs/2403.18703" target="_blank">
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6"></path><polyline points="15 3 21 3 21 9"></polyline><line x1="10" y1="14" x2="21" y2="3"></line></svg>
+            arXiv:2403.18703
+          </a>
+        </div>
+      </li>
+    </ul>
   </section>
 
   <!-- Citation Block -->
