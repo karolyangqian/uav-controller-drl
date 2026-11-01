@@ -1,0 +1,6 @@
+# Jekyll configuration for GitHub Pages (/docs source)
+exclude:
+  - report_template.md
+  - FORMAT_GUIDE.md
+  - ARTIFACTS_AND_TELEMETRY.md
+  - preamble.tex

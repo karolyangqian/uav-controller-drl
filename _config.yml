@@ -1,0 +1,20 @@
+# Jekyll configuration for GitHub Pages
+title: "Autonomous Quadrotor UAV Controller via DRL"
+description: "End-to-End DRL 3D Flight Controller in MuJoCo with HIL FPGA Deployment on AMD Kria KR260"
+
+# Exclude raw LaTeX/Pandoc templates and non-web source files from Jekyll processing
+exclude:
+  - docs/report_template.md
+  - docs/FORMAT_GUIDE.md
+  - docs/ARTIFACTS_AND_TELEMETRY.md
+  - docs/preamble.tex
+  - README.md
+  - requirements.txt
+  - models/
+  - envs/
+  - scripts/
+  - deployment/
+  - telemetry/
+  - checkpoints/
+  - tb_logs/
+  - .venv/

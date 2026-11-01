@@ -3,8 +3,9 @@ title: "Autonomous 3D Quadrotor UAV Controller via Deep Reinforcement Learning w
 author:
   - "Karol Yangqian Poetracahya (NIM: 13523093)"
   - "School of Electrical Engineering and Informatics (STEI), Institut Teknologi Bandung"
+  - "Academic Year 2026/2027"
   - "Email: karolyangqian14@gmail.com, 13523093@std.stei.itb.ac.id"
-date: "Academic Year 2026/2027 — Institut Teknologi Bandung"
+date: "November 2026"
 geometry: margin=1in
 fontsize: 12pt
 numbersections: true
