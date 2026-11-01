@@ -86,7 +86,7 @@ Addressing real-world deployment issues (actuator chattering and environment bri
 │   ├── weights.h              # Q8.8 fixed-point C arrays for FPGA
 │   └── test_forward.c         # C testbench (1.38 us latency)
 ├── docs/
-│   ├── index.html             # Interactive academic web report (le-wm.github.io style)
+│   ├── index.html             # Interactive academic project landing page & report
 │   ├── FORMAT_GUIDE.md        # Report formatting rules & Pandoc compilation guide
 │   ├── ARTIFACTS_AND_TELEMETRY.md # Detailed catalog of all media, plots & telemetry
 │   ├── preamble.tex           # LaTeX styling template (Times New Roman 12pt, justified, black)
