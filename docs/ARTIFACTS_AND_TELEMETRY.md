@@ -22,11 +22,18 @@ This document catalogs all figures, video clips, 3D trajectory renders, and nume
 ├── telemetry/
 │   ├── flight_telemetry.csv        # 27-column time-series flight telemetry log (50 Hz)
 │   └── step_response_telemetry.csv # Time-series log of 3D step transition dynamics
-└── deployment/
-    ├── models/
-    │   └── quadrotor_policy.onnx   # Exported ONNX model (9.36 KB footprint)
-    ├── weights.h                   # Signed 16-bit Q8.8 fixed-point C arrays for FPGA
-    └── test_forward.c              # Standalone embedded C testbench (1.38 us latency)
+├── deployment/
+│   ├── models/
+│   │   └── quadrotor_policy.onnx   # Exported ONNX model (9.36 KB footprint)
+│   ├── weights.h                   # Signed 16-bit Q8.8 fixed-point C arrays for FPGA
+│   ├── test_forward.c              # Standalone embedded C testbench (1.38 us latency)
+│   ├── kria_client.c               # Day 5: Pure C Q8.8 HIL client (< 2 us latency)
+│   └── kria_client.py              # Day 5: Python ONNX Runtime HIL client
+├── scripts/
+│   ├── hil_sim_server.py           # Day 5: 50 Hz control / 500 Hz physics HIL server
+│   └── benchmark_hil.py            # Day 5: Automated HIL benchmark & latency stress test
+└── docs/
+    └── HIL_DEPLOYMENT_GUIDE.md     # Day 5: Physical AMD Kria KR260 deployment manual
 ```
 
 ---
@@ -128,7 +135,19 @@ plt.show()
 
 ---
 
-## 🔄 5. How to Re-Generate All Artifacts
+## ⚡ 5. Hardware-in-the-Loop (HIL) Suite (Day 5)
+
+| File | Type | Description |
+| :--- | :--- | :--- |
+| **[`scripts/hil_sim_server.py`](file:///home/karol/ITB/kuliah/uav-controller/scripts/hil_sim_server.py)** | Python Script | 50 Hz control / 500 Hz physics simulation server. Packages 16-D body-frame observations into 72-byte binary UDP packets and steps physics upon receiving 24-byte action packets. Features automatic hover failsafe. |
+| **[`deployment/kria_client.c`](file:///home/karol/ITB/kuliah/uav-controller/deployment/kria_client.c)** | C Source | Standalone POSIX C socket client using signed 16-bit Q8.8 fixed-point arithmetic (`weights.h`). Inference latency: **$1.38\,\mu\text{s}$** ($> 720\text{ kHz}$ throughput). Binary size: $37\text{ KB}$. |
+| **[`deployment/kria_client.py`](file:///home/karol/ITB/kuliah/uav-controller/deployment/kria_client.py)** | Python Script | Client running the $9.36\text{ KB}$ ONNX model on the Kria KR260 ARM Cortex-A53 PS using `onnxruntime`. |
+| **[`scripts/benchmark_hil.py`](file:///home/karol/ITB/kuliah/uav-controller/scripts/benchmark_hil.py)** | Python Script | Automated closed-loop HIL benchmark testbench. Measures round-trip time (RTT), jitter, hover error, and tests network latency injection ($2\text{ ms}$) and packet drops ($5\%$). |
+| **[`docs/HIL_DEPLOYMENT_GUIDE.md`](file:///home/karol/ITB/kuliah/uav-controller/docs/HIL_DEPLOYMENT_GUIDE.md)** | Markdown Guide | Step-by-step setup guide for physical Ethernet connection between host laptop (`192.168.1.10`) and AMD Kria KR260 (`192.168.1.11`). |
+
+---
+
+## 🔄 6. How to Re-Generate All Artifacts & Run Benchmarks
 
 To re-run and regenerate all figures, media clips, and telemetry files:
 
@@ -144,4 +163,13 @@ python scripts/evaluate_step_response.py
 
 # 3. Re-render video clips (MP4/GIF), high-res snapshots, and flight telemetry CSV:
 python scripts/generate_media_and_telemetry.py
+
+# 4. Run closed-loop HIL benchmark with Embedded C Q8.8 client:
+python scripts/benchmark_hil.py --client c --duration 10.0
+
+# 5. Run closed-loop HIL benchmark with Python ONNX client:
+python scripts/benchmark_hil.py --client python --duration 10.0
+
+# 6. Run HIL network stress test (2 ms network delay + 5% packet drops):
+python scripts/benchmark_hil.py --client c --duration 10.0 --latency-ms 2.0 --drop-rate 0.05
 ```
