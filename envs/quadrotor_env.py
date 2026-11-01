@@ -61,10 +61,12 @@ class QuadrotorEnv(gym.Env):
             mujoco.mj_name2id(self.model, mujoco.mjtObj.mjOBJ_BODY, "target")
         ]
         self.base_mass = float(self.model.body_mass[self.body_id])
+        self.base_inertia = self.model.body_inertia[self.body_id].copy()
         self.hover_thrust = self.base_mass * 9.81  # ~7.848 N
         self.thrust_range = 6.0                     # Max command swing: hover +/- 6N
         self.max_rate_xy = 3.0                      # rad/s (~170 deg/s)
         self.max_rate_z = 1.5                       # rad/s (~85 deg/s)
+
 
         # PID Inner controller
         self.pid = RatePIDController()
@@ -127,7 +129,14 @@ class QuadrotorEnv(gym.Env):
             state["ang_vel_body"],      # 3
             self.prev_action,           # 4
         ]).astype(np.float32)
+
+        # Add realistic IMU/sensor noise if domain randomization is enabled
+        if self.randomize_domain:
+            noise = self.np_random.normal(0.0, 0.01, size=obs.shape).astype(np.float32)
+            obs = obs + noise
+
         return obs
+
 
     def reset(self, seed=None, options=None):
         super().reset(seed=seed)
@@ -162,10 +171,20 @@ class QuadrotorEnv(gym.Env):
             # Vary mass by +/- 15%
             mass_factor = self.np_random.uniform(0.85, 1.15)
             self.model.body_mass[self.body_id] = self.base_mass * mass_factor
-            # Random wind disturbance (constant force vector for episode)
-            self.wind_force = self.np_random.uniform(-1.0, 1.0, size=3).astype(np.float32)
+            # Vary inertia tensor proportionally
+            inertia_jitter = self.np_random.uniform(0.9, 1.1, size=3)
+            self.model.body_inertia[self.body_id] = self.base_inertia * mass_factor * inertia_jitter
+            # Base steady wind vector (up to 1.5 N horizontal, 0.4 N vertical)
+            self.wind_base = self.np_random.uniform([-1.5, -1.5, -0.4], [1.5, 1.5, 0.4]).astype(np.float32)
+            self.wind_force = self.wind_base.copy()
+            # Random initial tilt up to +/- 15 deg (recovery practice)
+            init_tilt = self.np_random.uniform(-0.25, 0.25, size=2)
+            self.data.qpos[3:7] = np.array([1.0, init_tilt[0], init_tilt[1], 0.0], dtype=np.float32)
+            self.data.qpos[3:7] /= np.linalg.norm(self.data.qpos[3:7])
         else:
             self.model.body_mass[self.body_id] = self.base_mass
+            self.model.body_inertia[self.body_id] = self.base_inertia.copy()
+            self.wind_base = np.zeros(3, dtype=np.float32)
             self.wind_force.fill(0.0)
 
         # Forward kinematics to update body positions
@@ -193,6 +212,12 @@ class QuadrotorEnv(gym.Env):
             self.filtered_action[3] * self.max_rate_z,
         ], dtype=np.float32)
 
+        # Update dynamic wind gusts during episode
+        if self.randomize_domain:
+            turb = self.np_random.normal(0.0, 0.15, size=3).astype(np.float32)
+            pulse = self.np_random.uniform(-1.0, 1.0, size=3).astype(np.float32) if self.np_random.random() < 0.05 else 0.0
+            self.wind_force = self.wind_base + turb + pulse
+
         # Substep physics loop (Inner loop: 500 Hz)
         for _ in range(self.substeps):
             # Apply wind disturbance force to drone center
@@ -208,6 +233,7 @@ class QuadrotorEnv(gym.Env):
             )
             self.data.ctrl[:] = motor_forces
             mujoco.mj_step(self.model, self.data)
+
 
         self.step_count += 1
         state = self._get_drone_state()

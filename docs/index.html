@@ -1,0 +1,903 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Autonomous 3D Quadrotor UAV Controller via DRL with HIL on AMD Kria KR260</title>
+
+  <!-- Google Fonts & KaTeX Math -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&family=Lora:ital,wght@0,400;0,500;0,600;1,400&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.8/dist/katex.min.css">
+  <script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.8/dist/katex.min.js"></script>
+  <script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.8/dist/contrib/auto-render.min.js"
+          onload="renderMathInElement(document.body, {delimiters: [{left: '$$', right: '$$', display: true}, {left: '$', right: '$', display: false}]});"></script>
+
+  <style>
+    :root {
+      --bg-color: #ffffff;
+      --card-bg: #fafafa;
+      --border-color: #e5e7eb;
+      --text-main: #1f2937;
+      --text-muted: #4b5563;
+      --primary: #2563eb;
+      --primary-dark: #1d4ed8;
+      --badge-bg: #1f2937;
+      --font-heading: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+      --font-body: 'Lora', Georgia, 'Times New Roman', serif;
+      --font-code: 'JetBrains Mono', monospace;
+    }
+
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+    }
+
+    body {
+      background-color: var(--bg-color);
+      color: var(--text-main);
+      font-family: var(--font-body);
+      font-size: 1.05rem;
+      line-height: 1.75;
+      -webkit-font-smoothing: antialiased;
+    }
+
+    .container {
+      max-width: 980px;
+      margin: 0 auto;
+      padding: 2.5rem 1.5rem;
+    }
+
+    /* Hero & Title */
+    .hero {
+      text-align: center;
+      padding: 2.5rem 0 2rem 0;
+    }
+
+    .publication-title {
+      font-family: var(--font-heading);
+      font-size: 2.35rem;
+      font-weight: 800;
+      line-height: 1.25;
+      color: #111827;
+      margin-bottom: 1.25rem;
+      letter-spacing: -0.02em;
+    }
+
+    .publication-title strong {
+      color: var(--primary);
+    }
+
+    .publication-authors {
+      font-family: var(--font-heading);
+      font-size: 1.15rem;
+      font-weight: 500;
+      color: #374151;
+      margin-bottom: 0.5rem;
+    }
+
+    .author-block {
+      display: inline-block;
+    }
+
+    .author-block a {
+      color: #111827;
+      text-decoration: none;
+      border-bottom: 1px dotted #9ca3af;
+      transition: color 0.15s;
+    }
+
+    .author-block a:hover {
+      color: var(--primary);
+    }
+
+    .author-meta {
+      font-family: var(--font-heading);
+      font-size: 0.95rem;
+      color: #6b7280;
+      margin-bottom: 1.5rem;
+      line-height: 1.5;
+    }
+
+    .author-meta .email-link {
+      color: #4b5563;
+      text-decoration: none;
+      font-family: var(--font-code);
+      font-size: 0.85rem;
+      background: #f3f4f6;
+      padding: 2px 6px;
+      border-radius: 4px;
+      margin: 0 3px;
+    }
+
+    .author-meta .email-link:hover {
+      color: var(--primary);
+    }
+
+    /* Links / Buttons */
+    .publication-links {
+      display: flex;
+      flex-wrap: wrap;
+      justify-content: center;
+      gap: 0.75rem;
+      margin-bottom: 2.5rem;
+    }
+
+    .btn {
+      font-family: var(--font-heading);
+      display: inline-flex;
+      align-items: center;
+      gap: 0.4rem;
+      background-color: var(--badge-bg);
+      color: #ffffff;
+      padding: 0.55rem 1.2rem;
+      font-size: 0.9rem;
+      font-weight: 600;
+      border-radius: 9999px;
+      text-decoration: none;
+      transition: all 0.2s ease;
+      box-shadow: 0 2px 4px rgba(0, 0, 0, 0.08);
+    }
+
+    .btn:hover {
+      background-color: #374151;
+      transform: translateY(-1px);
+      box-shadow: 0 4px 8px rgba(0, 0, 0, 0.12);
+    }
+
+    .btn-primary {
+      background-color: var(--primary);
+    }
+
+    .btn-primary:hover {
+      background-color: var(--primary-dark);
+    }
+
+    /* Video & Teaser */
+    .teaser-wrapper {
+      margin: 2rem 0;
+      text-align: center;
+    }
+
+    .video-card {
+      background: #000;
+      border-radius: 12px;
+      overflow: hidden;
+      box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.15), 0 8px 10px -6px rgba(0, 0, 0, 0.1);
+      display: inline-block;
+      max-width: 100%;
+    }
+
+    .video-card video, .video-card img {
+      display: block;
+      width: 100%;
+      max-width: 760px;
+      height: auto;
+    }
+
+    .caption {
+      font-family: var(--font-heading);
+      font-size: 0.9rem;
+      color: #6b7280;
+      margin-top: 0.75rem;
+      text-align: center;
+    }
+
+    /* Abstract Box */
+    .abstract-box {
+      background-color: var(--card-bg);
+      border: 1px solid var(--border-color);
+      border-radius: 12px;
+      padding: 2rem;
+      margin: 2.5rem 0;
+      box-shadow: 0 1px 3px rgba(0, 0, 0, 0.03);
+    }
+
+    .abstract-title {
+      font-family: var(--font-heading);
+      font-size: 1.4rem;
+      font-weight: 700;
+      text-align: center;
+      margin-bottom: 1rem;
+      color: #111827;
+      text-transform: uppercase;
+      letter-spacing: 0.05em;
+    }
+
+    .abstract-text {
+      text-align: justify;
+      color: #374151;
+      font-size: 1.05rem;
+      line-height: 1.8;
+    }
+
+    /* Sections */
+    section {
+      margin: 3.5rem 0;
+    }
+
+    .section-title {
+      font-family: var(--font-heading);
+      font-size: 1.7rem;
+      font-weight: 700;
+      color: #111827;
+      border-bottom: 2px solid #e5e7eb;
+      padding-bottom: 0.5rem;
+      margin-bottom: 1.5rem;
+      letter-spacing: -0.01em;
+    }
+
+    .subsection-title {
+      font-family: var(--font-heading);
+      font-size: 1.25rem;
+      font-weight: 600;
+      color: #1f2937;
+      margin: 1.75rem 0 0.75rem 0;
+    }
+
+    p {
+      margin-bottom: 1.25rem;
+      text-align: justify;
+    }
+
+    /* Key Metrics Grid */
+    .metrics-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+      gap: 1.25rem;
+      margin: 2rem 0;
+    }
+
+    .metric-card {
+      background: #ffffff;
+      border: 1px solid var(--border-color);
+      border-radius: 10px;
+      padding: 1.25rem;
+      text-align: center;
+      box-shadow: 0 1px 3px rgba(0, 0, 0, 0.05);
+      transition: transform 0.15s ease, box-shadow 0.15s ease;
+    }
+
+    .metric-card:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 4px 6px rgba(0, 0, 0, 0.07);
+    }
+
+    .metric-val {
+      font-family: var(--font-heading);
+      font-size: 2.1rem;
+      font-weight: 800;
+      color: var(--primary);
+      margin-bottom: 0.25rem;
+    }
+
+    .metric-val.green { color: #059669; }
+    .metric-val.purple { color: #7c3aed; }
+    .metric-val.amber { color: #d97706; }
+
+    .metric-lbl {
+      font-family: var(--font-heading);
+      font-size: 0.85rem;
+      font-weight: 600;
+      color: #4b5563;
+      text-transform: uppercase;
+      letter-spacing: 0.05em;
+    }
+
+    .metric-sub {
+      font-family: var(--font-heading);
+      font-size: 0.75rem;
+      color: #9ca3af;
+      margin-top: 0.25rem;
+    }
+
+    /* Modern Pipeline Architecture Diagram */
+    .pipeline-container {
+      margin: 2.5rem 0;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 0;
+    }
+
+    .pipeline-card {
+      width: 100%;
+      background: #ffffff;
+      border: 1px solid #e2e8f0;
+      border-radius: 12px;
+      padding: 1.25rem 1.5rem;
+      box-shadow: 0 2px 4px rgba(0, 0, 0, 0.04);
+      transition: border-color 0.15s ease, box-shadow 0.15s ease;
+    }
+
+    .pipeline-card:hover {
+      border-color: #cbd5e1;
+      box-shadow: 0 4px 10px rgba(0, 0, 0, 0.06);
+    }
+
+    .pipeline-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      flex-wrap: wrap;
+      gap: 0.5rem;
+      margin-bottom: 0.6rem;
+    }
+
+    .pipeline-title {
+      font-family: var(--font-heading);
+      font-size: 1.05rem;
+      font-weight: 700;
+      color: #0f172a;
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+    }
+
+    .pipeline-badge {
+      font-family: var(--font-code);
+      font-size: 0.75rem;
+      font-weight: 600;
+      padding: 3px 8px;
+      border-radius: 6px;
+      background: #f1f5f9;
+      color: #334155;
+    }
+
+    .badge-blue { background: #eff6ff; color: #1d4ed8; border: 1px solid #bfdbfe; }
+    .badge-purple { background: #f5f3ff; color: #6d28d9; border: 1px solid #ddd6fe; }
+    .badge-amber { background: #fffbeb; color: #b45309; border: 1px solid #fde68a; }
+    .badge-green { background: #f0fdf4; color: #15803d; border: 1px solid #bbf7d0; }
+
+    .pipeline-content {
+      font-family: var(--font-heading);
+      font-size: 0.9rem;
+      color: #475569;
+      line-height: 1.6;
+    }
+
+    .pill-list {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 0.4rem;
+      margin-top: 0.5rem;
+    }
+
+    .pill {
+      font-family: var(--font-code);
+      font-size: 0.8rem;
+      background: #f8fafc;
+      border: 1px solid #e2e8f0;
+      padding: 3px 9px;
+      border-radius: 6px;
+      color: #1e293b;
+    }
+
+    .pipeline-connector {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      margin: 0.4rem 0;
+    }
+
+    .connector-line {
+      width: 2px;
+      height: 10px;
+      background: #cbd5e1;
+    }
+
+    .connector-badge {
+      font-family: var(--font-heading);
+      font-size: 0.78rem;
+      font-weight: 600;
+      padding: 3px 12px;
+      border-radius: 9999px;
+      background: #ffffff;
+      border: 1px solid #cbd5e1;
+      color: #334155;
+      display: flex;
+      align-items: center;
+      gap: 0.35rem;
+      box-shadow: 0 1px 3px rgba(0,0,0,0.04);
+    }
+
+
+    /* Tables */
+    .table-container {
+      overflow-x: auto;
+      margin: 2rem 0;
+    }
+
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      font-family: var(--font-heading);
+      font-size: 0.95rem;
+      text-align: left;
+    }
+
+    th {
+      background-color: #f3f4f6;
+      color: #111827;
+      font-weight: 700;
+      padding: 0.75rem 1rem;
+      border-bottom: 2px solid #d1d5db;
+    }
+
+    td {
+      padding: 0.75rem 1rem;
+      border-bottom: 1px solid var(--border-color);
+      color: #374151;
+    }
+
+    tr:hover td {
+      background-color: #f9fafb;
+    }
+
+    .text-center { text-align: center; }
+    .font-bold { font-weight: 700; }
+    .highlight-cell { background-color: #ecfdf5; color: #065f46; font-weight: 700; }
+
+    /* Media Grid */
+    .media-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(400px, 1fr));
+      gap: 1.5rem;
+      margin: 2rem 0;
+    }
+
+    .media-item {
+      background: #ffffff;
+      border: 1px solid var(--border-color);
+      border-radius: 10px;
+      overflow: hidden;
+      box-shadow: 0 2px 4px rgba(0, 0, 0, 0.04);
+    }
+
+    .media-item img {
+      width: 100%;
+      height: auto;
+      display: block;
+    }
+
+    .media-item .item-desc {
+      padding: 1rem;
+      font-family: var(--font-heading);
+      font-size: 0.88rem;
+      color: #4b5563;
+      background: #ffffff;
+      border-top: 1px solid var(--border-color);
+    }
+
+    /* BibTeX / Code block */
+    pre.code-box {
+      background: #111827;
+      color: #f3f4f6;
+      padding: 1.25rem;
+      border-radius: 8px;
+      font-family: var(--font-code);
+      font-size: 0.85rem;
+      overflow-x: auto;
+      line-height: 1.6;
+    }
+
+    /* Footer */
+    footer {
+      border-top: 1px solid var(--border-color);
+      padding: 2.5rem 0;
+      text-align: center;
+      font-family: var(--font-heading);
+      font-size: 0.9rem;
+      color: #9ca3af;
+      margin-top: 4rem;
+    }
+
+    @media (max-width: 768px) {
+      .publication-title { font-size: 1.8rem; }
+      .media-grid { grid-template-columns: 1fr; }
+    }
+  </style>
+</head>
+<body>
+
+<div class="container">
+
+  <!-- Header / Hero Section -->
+  <header class="hero">
+    <h1 class="publication-title">
+      Autonomous 3D Quadrotor UAV Controller via <strong>Deep Reinforcement Learning</strong>
+    </h1>
+    <h3 style="font-family: var(--font-heading); font-size: 1.25rem; font-weight: 500; color: #4b5563; margin-bottom: 1.25rem;">
+      Sim-to-Real Jitter Mitigation & Hardware-in-the-Loop Implementation on AMD Kria KR260
+    </h3>
+
+    <!-- Author Bio & Affiliation -->
+    <div class="publication-authors">
+      <span class="author-block"><strong>Karol Yangqian Poetracahya</strong></span>
+    </div>
+
+    <div class="author-meta">
+      <div>Student ID (NIM): <strong>13523093</strong></div>
+      <div>School of Electrical Engineering and Informatics (STEI)</div>
+      <div><strong>Institut Teknologi Bandung (ITB)</strong>, Indonesia</div>
+      <div style="margin-top: 0.4rem;">
+        Email:
+        <a href="mailto:karolyangqian14@gmail.com" class="email-link">karolyangqian14@gmail.com</a>
+        <a href="mailto:13523093@std.stei.itb.ac.id" class="email-link">13523093@std.stei.itb.ac.id</a>
+      </div>
+    </div>
+
+    <!-- Publication & Resource Buttons -->
+    <div class="publication-links">
+      <a href="report.pdf" class="btn btn-primary" target="_blank">
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path><polyline points="14 2 14 8 20 8"></polyline><line x1="16" y1="13" x2="8" y2="13"></line><line x1="16" y1="17" x2="8" y2="17"></line><polyline points="10 9 9 9 8 9"></polyline></svg>
+        <span>Report PDF</span>
+      </a>
+      <a href="https://github.com" class="btn" target="_blank">
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor"><path d="M12 0C5.37 0 0 5.37 0 12c0 5.31 3.435 9.795 8.205 11.385.6.105.825-.255.825-.57 0-.285-.015-1.23-.015-2.235-3.015.555-3.795-.735-4.035-1.41-.135-.345-.72-1.41-1.23-1.695-.42-.225-1.02-.78-.015-.795.945-.015 1.62.87 1.845 1.23 1.08 1.815 2.805 1.305 3.495.99.105-.78.42-1.305.765-1.605-2.67-.3-5.46-1.335-5.46-5.925 0-1.305.465-2.385 1.23-3.225-.12-.3-.54-1.53.12-3.18 0 0 1.005-.315 3.3 1.23.96-.27 1.98-.405 3-.405s2.04.135 3 .405c2.295-1.56 3.3-1.23 3.3-1.23.66 1.65.24 2.88.12 3.18.765.84 1.23 1.905 1.23 3.225 0 4.605-2.805 5.625-5.475 5.925.435.375.81 1.095.81 2.22 0 1.605-.015 2.895-.015 3.3 0 .315.225.69.825.57A12.02 12.02 0 0 0 24 12c0-6.63-5.37-12-12-12z"/></svg>
+        <span>Source Code</span>
+      </a>
+      <a href="../deployment/models/quadrotor_policy.onnx" class="btn" download>
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path><polyline points="7 10 12 15 17 10"></polyline><line x1="12" y1="15" x2="12" y2="3"></line></svg>
+        <span>ONNX Model (9.4 KB)</span>
+      </a>
+      <a href="../telemetry/flight_telemetry.csv" class="btn" download>
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="18" height="18" rx="2" ry="2"></rect><line x1="3" y1="9" x2="21" y2="9"></line><line x1="9" y1="21" x2="9" y2="9"></line></svg>
+        <span>Telemetry CSV</span>
+      </a>
+    </div>
+
+    <!-- Teaser Video Showcase -->
+    <div class="teaser-wrapper">
+      <div class="video-card">
+        <video autoplay muted loop playsinline controls poster="../media/render_hover_snapshot.png">
+          <source src="../media/flight_simulation.mp4" type="video/mp4">
+          <img src="../media/flight_simulation.gif" alt="Flight Simulation Animation">
+        </video>
+      </div>
+      <p class="caption">
+        <strong>Figure 1:</strong> Closed-loop 3D waypoint tracking in MuJoCo physics (500 Hz inner loop, 50 Hz outer DRL policy) with active wind gust rejection.
+      </p>
+    </div>
+  </header>
+
+  <!-- Abstract Section -->
+  <div class="abstract-box">
+    <div class="abstract-title">Abstract</div>
+    <p class="abstract-text">
+      Reinforcement learning for unmanned aerial vehicles (UAVs) frequently suffers from severe sim-to-real gaps, high-frequency actuator chattering (jitter), and vulnerability to unmodeled aerodynamic disturbances. In this project, we develop and validate an end-to-end Deep Reinforcement Learning (DRL) 3D flight controller operating in MuJoCo physics. To ensure smooth, jitter-free actuation, we formulate a hierarchical architecture where an outer-loop Proximal Policy Optimization (PPO) agent commands collective vertical thrust and 3D body rates at 50 Hz through an action low-pass filter, while an inner-loop rate PID controller executes at 500 Hz. Through extensive domain randomization—incorporating persistent wind drag, stochastic gust bursts up to $2.5\text{ N}$, $\pm 15\%$ mass/inertia shifts, and sensor noise—the robust policy achieves sub-5 cm steady-state hover precision under nominal conditions and reduces steady-state drift under gusts by $62.2\%$ ($13.46\text{ cm}$ vs $35.61\text{ cm}$). Finally, the policy is compiled into a $9.36\text{ KB}$ ONNX model and quantized into Q8.8 fixed-point integer format, maintaining $99.77\%$ accuracy with a $1.38\,\mu\text{s}$ forward inference latency on edge hardware, clearing the pathway for real-time Hardware-in-the-Loop deployment on the AMD Kria KR260 FPGA platform.
+    </p>
+  </div>
+
+  <!-- Key Results Summary Cards -->
+  <div class="metrics-grid">
+    <div class="metric-card">
+      <div class="metric-val green">4.1 cm</div>
+      <div class="metric-lbl">Nominal Hover Error</div>
+      <div class="metric-sub">Across 20 random 3D waypoints</div>
+    </div>
+    <div class="metric-card">
+      <div class="metric-val">13.5 cm</div>
+      <div class="metric-lbl">Under 2.5 N Wind Gusts</div>
+      <div class="metric-sub">62.2% error reduction vs baseline</div>
+    </div>
+    <div class="metric-card">
+      <div class="metric-val purple">1.38 &mu;s</div>
+      <div class="metric-lbl">Embedded C Latency</div>
+      <div class="metric-sub">723 kHz inference throughput</div>
+    </div>
+    <div class="metric-card">
+      <div class="metric-val amber">9.36 KB</div>
+      <div class="metric-lbl">Model Binary Footprint</div>
+      <div class="metric-sub">Fits directly into on-chip BRAM</div>
+    </div>
+  </div>
+
+  <!-- Methodology Section -->
+  <section id="methodology">
+    <h2 class="section-title">1. Control Architecture & Jitter Mitigation</h2>
+    <p>
+      Direct motor PWM reinforcement learning typically produces bang-bang control actions that destroy real drone actuators and fail catastrophically under transport latency. To resolve this, our system employs a two-tier hierarchical flight stack:
+    </p>
+
+    <div class="pipeline-container">
+      <!-- Tier 1: Observation Space -->
+      <div class="pipeline-card">
+        <div class="pipeline-header">
+          <div class="pipeline-title">
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M2 12h20M12 2a15.3 15.3 0 0 1 4 10 15.3 15.3 0 0 1-4 10 15.3 15.3 0 0 1-4-10 15.3 15.3 0 0 1 4-10z"></path></svg>
+            16-Dimensional Body-Frame Observation Vector $\mathbf{s}_t$
+          </div>
+          <span class="pipeline-badge badge-blue">Input State &bull; &reals;<sup>16</sup></span>
+        </div>
+        <div class="pipeline-content">
+          <div>Rotation-invariant kinematic features expressed in the drone body reference frame:</div>
+          <div class="pill-list">
+            <span class="pill"><strong>e<sub>p,body</sub></strong> (3D Position Error)</span>
+            <span class="pill"><strong>v<sub>body</sub></strong> (3D Linear Velocity)</span>
+            <span class="pill"><strong>z<sub>body</sub></strong> (3D Projected Tilt)</span>
+            <span class="pill"><strong>&omega;<sub>body</sub></strong> (3D Body Rates)</span>
+            <span class="pill"><strong>a<sub>t-1</sub></strong> (Previous 4D Action)</span>
+          </div>
+        </div>
+      </div>
+
+      <!-- Connector 1 -->
+      <div class="pipeline-connector">
+        <div class="connector-line"></div>
+        <div class="connector-badge">
+          <span>&darr;</span>
+          <span>50 Hz Outer DRL Control Loop (&Delta;t = 0.02s)</span>
+        </div>
+        <div class="connector-line"></div>
+      </div>
+
+      <!-- Tier 2: DRL Policy -->
+      <div class="pipeline-card">
+        <div class="pipeline-header">
+          <div class="pipeline-title">
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="4" y="4" width="16" height="16" rx="2" ry="2"></rect><rect x="9" y="9" width="6" height="6"></rect><line x1="9" y1="1" x2="9" y2="4"></line><line x1="15" y1="1" x2="15" y2="4"></line><line x1="9" y1="20" x2="9" y2="23"></line><line x1="15" y1="20" x2="15" y2="23"></line><line x1="20" y1="9" x2="23" y2="9"></line><line x1="20" y1="14" x2="23" y2="14"></line><line x1="1" y1="9" x2="4" y2="9"></line><line x1="1" y1="14" x2="4" y2="14"></line></svg>
+            PPO Flight Policy Network (MLP: 16 &rarr; 64 &rarr; 64 &rarr; 4)
+          </div>
+          <span class="pipeline-badge badge-purple">Pure ReLU &bull; Direct FPGA PL Synthesis</span>
+        </div>
+        <div class="pipeline-content">
+          <div>Outputs high-level vertical thrust and angular body rate commands: <code>[T_z, &omega;_x, &omega;_y, &omega;_z] &isin; [-1, 1]<sup>4</sup></code></div>
+          <div style="margin-top: 0.35rem; font-size: 0.85rem; color: #64748b;">
+            <strong>Actuator Smoothing (EMA Low-Pass Filter):</strong>
+            <code>a<sub>t</sub><sup>applied</sup> = 0.75 a<sub>t</sub> + 0.25 a<sub>t-1</sub><sup>applied</sup></code> (eliminates motor chatter)
+          </div>
+        </div>
+      </div>
+
+      <!-- Connector 2 -->
+      <div class="pipeline-connector">
+        <div class="connector-line"></div>
+        <div class="connector-badge">
+          <span>&darr;</span>
+          <span>500 Hz Inner Loop Rate PID & Analytical Mixer (&Delta;t = 0.002s)</span>
+        </div>
+        <div class="connector-line"></div>
+      </div>
+
+      <!-- Tier 3: Inner Rate PID -->
+      <div class="pipeline-card">
+        <div class="pipeline-header">
+          <div class="pipeline-title">
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="3"></circle><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1 0 2.83 2 2 0 0 1-2.83 0l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-2 2 2 2 0 0 1-2-2v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83 0 2 2 0 0 1 0-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1-2-2 2 2 0 0 1 2-2h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 0-2.83 2 2 0 0 1 2.83 0l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 2-2 2 2 0 0 1 2 2v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 0 2 2 0 0 1 0 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 2 2 2 2 0 0 1-2 2h-.09a1.65 1.65 0 0 0-1.51 1z"></path></svg>
+            3-Axis Angular Rate PID & Analytical Inverse Mixer
+          </div>
+          <span class="pipeline-badge badge-amber">10&times; Physics Sub-stepping</span>
+        </div>
+        <div class="pipeline-content">
+          <div>Decouples attitude stabilization from trajectory navigation. Closed-form inverse mixer:</div>
+          <div style="font-family: var(--font-code); font-size: 0.8rem; background: #f8fafc; padding: 0.5rem 0.75rem; border-radius: 6px; margin-top: 0.4rem; border: 1px solid #e2e8f0; line-height: 1.5;">
+            F<sub>0</sub> = 0.25 T<sub>z</sub> - 1/(4d)&tau;<sub>x</sub> - 1/(4d)&tau;<sub>y</sub> - 1/(4k<sub>m</sub>)&tau;<sub>z</sub> &nbsp;|&nbsp;
+            F<sub>1</sub> = 0.25 T<sub>z</sub> + 1/(4d)&tau;<sub>x</sub> - 1/(4d)&tau;<sub>y</sub> + 1/(4k<sub>m</sub>)&tau;<sub>z</sub><br>
+            F<sub>2</sub> = 0.25 T<sub>z</sub> + 1/(4d)&tau;<sub>x</sub> + 1/(4d)&tau;<sub>y</sub> - 1/(4k<sub>m</sub>)&tau;<sub>z</sub> &nbsp;|&nbsp;
+            F<sub>3</sub> = 0.25 T<sub>z</sub> - 1/(4d)&tau;<sub>x</sub> + 1/(4d)&tau;<sub>y</sub> + 1/(4k<sub>m</sub>)&tau;<sub>z</sub>
+          </div>
+        </div>
+      </div>
+
+      <!-- Connector 3 -->
+      <div class="pipeline-connector">
+        <div class="connector-line"></div>
+        <div class="connector-badge">
+          <span>&darr;</span>
+          <span>4 Commanded Motor Thrusts [F<sub>0</sub>, F<sub>1</sub>, F<sub>2</sub>, F<sub>3</sub>] &isin; [0, 4.5] N</span>
+        </div>
+        <div class="connector-line"></div>
+      </div>
+
+      <!-- Tier 4: MuJoCo Physics -->
+      <div class="pipeline-card">
+        <div class="pipeline-header">
+          <div class="pipeline-title">
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 2L2 7l10 5 10-5-10-5zM2 12l10 5 10-5M2 17l10 5 10-5"></path></svg>
+            MuJoCo 6-DoF Physics Simulation Environment
+          </div>
+          <span class="pipeline-badge badge-green">Rigid Body Dynamics &bull; timestep = 0.002s</span>
+        </div>
+        <div class="pipeline-content">
+          <div>High-fidelity simulation of 0.8 kg X-4 quadrotor ($0.3\text{ m}$ diagonal, $2.3:1$ thrust-to-weight).</div>
+          <div style="margin-top: 0.35rem; font-size: 0.85rem; color: #64748b;">
+            <strong>Disturbance Injection:</strong> Stochastic wind gusts (up to $2.5\text{ N}$) &bull; $\pm 15\%$ Mass/Inertia shift &bull; IMU sensor noise.
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <h3 class="subsection-title">Anti-Jitter Reward Formulation</h3>
+    <p>
+      To enforce smooth control trajectories, we penalize the first-order action derivative in the reward:
+    </p>
+    $$r_t = r_{\text{pos}} + r_{\text{vel}} + r_{\text{upright}} + r_{\text{alive}} - \lambda_1 \|\mathbf{a}_t - \mathbf{a}_{t-1}\|^2 - \lambda_2 \|\mathbf{a}_t\|^2$$
+    <p>
+      Combined with the EMA filter ($\alpha = 0.75$), this restricts the action change rate to $\|\Delta \mathbf{a}\| \approx 0.0107$, resulting in smooth, continuous thrust adjustments.
+    </p>
+  </section>
+
+  <!-- Training & Benchmark Visualizations -->
+  <section id="results">
+    <h2 class="section-title">2. Experimental Results & Visualizations</h2>
+
+    <div class="media-grid">
+      <div class="media-item">
+        <img src="../figures/comparison_benchmark.png" alt="Baseline vs Robust Disturbance Comparison">
+        <div class="item-desc">
+          <strong>Figure 2: Disturbance Rejection Benchmark.</strong> Comparison under active $2.5\text{ N}$ aerodynamic wind gusts and mass shifts. The robust policy achieves $13.5\text{ cm}$ steady-state error ($62.2\%$ reduction) and an $85\%$ target acquisition rate.
+        </div>
+      </div>
+      <div class="media-item">
+        <img src="../figures/trajectory_3d.png" alt="3D Spatial Trajectory Plot">
+        <div class="item-desc">
+          <strong>Figure 3: 3D Autonomous Waypoint Trajectory.</strong> Spatial path in MuJoCo departing origin $[0, 0, 1]\text{ m}$ and converging directly into the $15\text{ cm}$ target sphere at $[1.0, 1.0, 1.8]\text{ m}$.
+        </div>
+      </div>
+    </div>
+
+    <div class="media-grid">
+      <div class="media-item">
+        <img src="../figures/step_response.png" alt="3D Step Response Telemetry">
+        <div class="item-desc">
+          <strong>Figure 4: 3D Step Response Telemetry.</strong> Simultaneous $1.732\text{ m}$ step displacement ($[0,0,1] \to [1,1,2]$). Rise time is $1.73\text{ s}$, steady-state error settles to $5.18\text{ cm}$, and peak transition tilt remains safe at $15.1^\circ$.
+        </div>
+      </div>
+      <div class="media-item">
+        <img src="../figures/robust_training_curve.png" alt="PPO Training Curves">
+        <div class="item-desc">
+          <strong>Figure 5: Training Convergence under Domain Randomization.</strong> Reward climbs to $> 915 / 1000$ and survival length hits $500/500$ across $1.5\text{M}$ steps ($9\text{m } 41\text{s}$ wall-clock time on 8 CPU threads).
+        </div>
+      </div>
+    </div>
+
+    <h3 class="subsection-title">Quantitative Performance Comparison</h3>
+    <div class="table-container">
+      <table>
+        <thead>
+          <tr>
+            <th>Evaluation Scenario</th>
+            <th class="text-center">Steady-State Error</th>
+            <th class="text-center">Success Rate (&lt;15cm)</th>
+            <th class="text-center">Survival Rate</th>
+            <th class="text-center">Mean Tilt Angle</th>
+            <th class="text-center">Mean Episode Reward</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td><strong>Nominal Baseline</strong> (No Disturbance)</td>
+            <td class="text-center font-bold">4.10 &plusmn; 1.64 cm</td>
+            <td class="text-center highlight-cell">100.0%</td>
+            <td class="text-center">100.0%</td>
+            <td class="text-center">1.58&deg;</td>
+            <td class="text-center">941.3 / 1000</td>
+          </tr>
+          <tr>
+            <td><strong>Nominal Policy under Gusts</strong> (Unmodeled)</td>
+            <td class="text-center">35.61 &plusmn; 20.22 cm</td>
+            <td class="text-center" style="color: #dc2626;">5.0%</td>
+            <td class="text-center">100.0%</td>
+            <td class="text-center">7.83&deg;</td>
+            <td class="text-center">847.4 / 1000</td>
+          </tr>
+          <tr>
+            <td><strong>Robust Policy under Gusts</strong> (Domain Rand.)</td>
+            <td class="text-center highlight-cell">13.46 &plusmn; 8.82 cm</td>
+            <td class="text-center highlight-cell">85.0%</td>
+            <td class="text-center">100.0%</td>
+            <td class="text-center font-bold">10.29&deg; (Active Lean)</td>
+            <td class="text-center font-bold">914.3 / 1000</td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+  </section>
+
+  <!-- High-Res Snapshots -->
+  <section id="visual-snapshots">
+    <h2 class="section-title">3. High-Resolution Simulation Snapshots</h2>
+    <div class="media-grid">
+      <div class="media-item">
+        <img src="../media/render_flight_snapshot.png" alt="Quadrotor High-Speed Translation">
+        <div class="item-desc">
+          <strong>Figure 6: Dynamic Translation ($t = 0.8\text{ s}$).</strong> The quadrotor pitches forward to generate horizontal thrust vectoring toward the setpoint.
+        </div>
+      </div>
+      <div class="media-item">
+        <img src="../media/render_hover_snapshot.png" alt="Quadrotor Precision Hover">
+        <div class="item-desc">
+          <strong>Figure 7: Stable Waypoint Hover ($t = 4.0\text{ s}$).</strong> Centered inside the $15\text{ cm}$ target sphere with level attitude and counter-wind trim.
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- Hardware Deployment & Quantization Section -->
+  <section id="hardware">
+    <h2 class="section-title">4. Hardware-in-the-Loop on AMD Kria KR260</h2>
+    <p>
+      The ultimate objective is executing inference on the <strong>AMD Kria KR260 Robotics Starter Kit</strong> (Quad-Core ARM Cortex-A53 PS + Zynq UltraScale+ FPGA PL) communicating in real time with the laptop simulation:
+    </p>
+
+    <div class="table-container">
+      <table>
+        <thead>
+          <tr>
+            <th>Deployment Phase</th>
+            <th>Target Hardware</th>
+            <th>Format & Precision</th>
+            <th class="text-center">Binary Footprint</th>
+            <th class="text-center">Inference Latency</th>
+            <th class="text-center">Accuracy Retention</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td><strong>Phase 1: PS Software Baseline</strong></td>
+            <td>ARM Cortex-A53 (Ubuntu 24.04)</td>
+            <td>ONNX Runtime (FP32)</td>
+            <td class="text-center font-bold">9.36 KB</td>
+            <td class="text-center">&lt; 85 &mu;s</td>
+            <td class="text-center highlight-cell">100.0%</td>
+          </tr>
+          <tr>
+            <td><strong>Phase 2: Embedded C Engine</strong></td>
+            <td>ARM Cortex-A53 / Soft-Core</td>
+            <td>Signed 16-bit Q8.8 (Fixed-Point)</td>
+            <td class="text-center font-bold">11.2 KB</td>
+            <td class="text-center highlight-cell">1.38 &mu;s</td>
+            <td class="text-center highlight-cell">99.77% (&plusmn;0.12 mm)</td>
+          </tr>
+          <tr>
+            <td><strong>Phase 3: PL Hardware IP Core</strong></td>
+            <td>Zynq UltraScale+ FPGA (PL)</td>
+            <td>Vitis HLS Pipelined RTL (Fixed-Point)</td>
+            <td class="text-center">&lt; 2 BRAMs, 12 DSPs</td>
+            <td class="text-center highlight-cell">&lt; 0.5 &mu;s (100 MHz)</td>
+            <td class="text-center highlight-cell">99.77%</td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+
+    <h3 class="subsection-title">Fixed-Point Quantization Arithmetic</h3>
+    <p>
+      In Q8.8 format ($1.0 = 256$, shift by $8$), matrix multiplication avoids floating-point hardware overhead and maps directly to integer DSP multipliers:
+    </p>
+    $$\mathbf{h}_1 = \max\left(0, (\mathbf{W}_{1,q} \mathbf{x}_q \gg 8) + \mathbf{b}_{1,q}\right)$$
+    $$\mathbf{h}_2 = \max\left(0, (\mathbf{W}_{2,q} \mathbf{h}_1 \gg 8) + \mathbf{b}_{2,q}\right)$$
+    $$\mathbf{a}_q = \text{clip}\left((\mathbf{W}_{3,q} \mathbf{h}_2 \gg 8) + \mathbf{b}_{3,q}, -256, 256\right)$$
+  </section>
+
+  <!-- Citation Block -->
+  <section id="citation">
+    <h2 class="section-title">Citation & Academic Reference</h2>
+    <pre class="code-box"><code>@techreport{poetracahya2026uav,
+  title       = {Autonomous 3D Quadrotor UAV Controller via Deep Reinforcement Learning with Hardware-in-the-Loop on AMD Kria KR260},
+  author      = {Poetracahya, Karol Yangqian},
+  institution = {Institut Teknologi Bandung (ITB)},
+  number      = {NIM: 13523093},
+  year        = {2026},
+  month       = {November},
+  url         = {https://github.com/karol/uav-controller}
+}</code></pre>
+  </section>
+
+  <!-- Footer -->
+  <footer>
+    <p>
+      &copy; 2026 Karol Yangqian Poetracahya &bull; Institut Teknologi Bandung (ITB) &bull; STEI Informatika
+    </p>
+    <p style="margin-top: 0.5rem; font-size: 0.8rem;">
+      Built with clean HTML/CSS &bull; Styled in the academic project webpage tradition (inspired by LeWorldModel / Nerfies).
+    </p>
+  </footer>
+
+</div>
+
+</body>
+</html>

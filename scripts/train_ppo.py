@@ -56,12 +56,13 @@ def main():
         monitor_dir=monitor_train_dir,
     )
 
-    # Evaluation environment (unrandomized baseline)
+    # Evaluation environment (matches domain randomization setting)
     eval_env = make_vec_env(
-        make_env_fn(randomize_domain=False),
+        make_env_fn(randomize_domain=args.randomize_domain),
         n_envs=2,
         vec_env_cls=SubprocVecEnv,
     )
+
 
     # Evaluation callback (eval every 25,000 steps)
     eval_callback = EvalCallback(

@@ -6,7 +6,12 @@
 
 % Full text justification & paragraph spacing
 \usepackage{microtype}
+\usepackage{graphicx}
+\usepackage{booktabs}
+\usepackage{longtable}
+\usepackage{float}
 \raggedbottom
+
 
 % Hyperlink formatting: strictly black, no colored borders
 \usepackage{hyperref}
@@ -46,3 +51,9 @@
 \postauthor{\par\end{center}\vskip 0.2em}
 \predate{\begin{center}\fontsize{11}{14}\color{black}}
 \postdate{\par\end{center}\vskip 1.5em}
+\renewcommand{\and}{\par\vskip 0.3em}
+
+% Figure Caption formatting
+\usepackage{caption}
+\captionsetup{font=small,labelfont=bf,textfont=it,justification=centering}
+
