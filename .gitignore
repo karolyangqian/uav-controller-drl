@@ -41,3 +41,7 @@ tb_logs/
 # MuJoCo / Video recordings
 *.mp4
 *.avi
+
+# Compiled C binaries
+deployment/kria_client
+deployment/test_forward

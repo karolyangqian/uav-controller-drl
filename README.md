@@ -84,9 +84,12 @@ Addressing real-world deployment issues (actuator chattering and environment bri
 │   ├── models/
 │   │   └── quadrotor_policy.onnx # 9.36 KB ONNX model
 │   ├── weights.h              # Q8.8 fixed-point C arrays for FPGA
-│   └── test_forward.c         # C testbench (1.38 us latency)
+│   ├── test_forward.c         # C testbench (1.38 us latency)
+│   ├── kria_client.c          # Ultra-fast C Q8.8 HIL client (< 2 us latency)
+│   └── kria_client.py         # Python ONNX Runtime HIL client
 ├── docs/
 │   ├── index.html             # Interactive academic project landing page & report
+│   ├── HIL_DEPLOYMENT_GUIDE.md# AMD Kria KR260 hardware setup & networking guide
 │   ├── FORMAT_GUIDE.md        # Report formatting rules & Pandoc compilation guide
 │   ├── ARTIFACTS_AND_TELEMETRY.md # Detailed catalog of all media, plots & telemetry
 │   ├── preamble.tex           # LaTeX styling template (Times New Roman 12pt, justified, black)
@@ -102,6 +105,8 @@ Addressing real-world deployment issues (actuator chattering and environment bri
 │   ├── evaluate_step_response.py # 3D step response analysis and plotting
 │   ├── export_onnx.py         # ONNX export and validation
 │   ├── quantize_policy.py     # Q8.8 fixed-point quantization and C-header exporter
+│   ├── hil_sim_server.py      # Day 5: HIL UDP simulation server (50 Hz control / 500 Hz physics)
+│   ├── benchmark_hil.py       # Day 5: Automated HIL benchmark & latency stress test
 │   ├── generate_media_and_telemetry.py # Offscreen renderer for MP4, GIF, and CSV telemetry
 │   ├── plot_comparison.py     # Bar chart and 3D trajectory plot generator
 │   └── build_report.sh        # One-command Pandoc report compiler (PDF + DOCX)
@@ -167,4 +172,20 @@ python scripts/benchmark_policy.py --model-path checkpoints/best_model/best_mode
 python scripts/eval_policy.py --model-path checkpoints/best_model/best_model.zip
 ```
 *(Left-click + drag to rotate camera, Right-click to zoom).*
+
+### 7. Hardware-in-the-Loop (HIL) Flight Control (Day 5)
+```bash
+# Automated loopback benchmark with Embedded C Q8.8 client:
+python scripts/benchmark_hil.py --client c --duration 10.0
+
+# Automated network latency stress test (2 ms network latency + 5% packet loss):
+python scripts/benchmark_hil.py --client c --duration 10.0 --latency-ms 2.0 --drop-rate 0.05
+
+# Automated benchmark with Python ONNX Runtime client:
+python scripts/benchmark_hil.py --client python --duration 10.0
+
+# Live HIL simulation server with interactive 3D viewer:
+python scripts/hil_sim_server.py --duration 0 --render
+```
+See [`docs/HIL_DEPLOYMENT_GUIDE.md`](docs/HIL_DEPLOYMENT_GUIDE.md) for full physical AMD Kria KR260 deployment steps.
 
