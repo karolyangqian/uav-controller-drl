@@ -1,0 +1,48 @@
+% LaTeX preamble for Pandoc report formatting
+\usepackage{mathptmx}         % Times New Roman font for pdflatex
+\usepackage[margin=1in]{geometry}
+\usepackage{xcolor}
+\color{black}                 % Ensure all text is strictly black
+
+% Full text justification & paragraph spacing
+\usepackage{microtype}
+\raggedbottom
+
+% Hyperlink formatting: strictly black, no colored borders
+\usepackage{hyperref}
+\hypersetup{
+    colorlinks=false,
+    pdfborder={0 0 0},
+    allcolors=black
+}
+
+% Section Titles formatting (titlesec)
+% All left-aligned (0pt left indent), distinguished by font size, bold, all black
+\usepackage{titlesec}
+
+% Level 1 Section: 16pt bold, 0pt left indent
+\titleformat{\section}
+  {\normalfont\fontsize{16}{20}\bfseries\color{black}}
+  {\thesection}{1em}{}
+\titlespacing*{\section}{0pt}{2ex plus 1ex minus .2ex}{1ex plus .2ex}
+
+% Level 2 Subsection (1.1): 14pt bold, 0pt left indent
+\titleformat{\subsection}
+  {\normalfont\fontsize{14}{18}\bfseries\color{black}}
+  {\thesubsection}{1em}{}
+\titlespacing*{\subsection}{0pt}{1.5ex plus 1ex minus .2ex}{0.8ex plus .2ex}
+
+% Level 3 Subsubsection (1.1.1): 12pt bold, 0pt left indent
+\titleformat{\subsubsection}
+  {\normalfont\fontsize{12}{15}\bfseries\color{black}}
+  {\thesubsubsection}{1em}{}
+\titlespacing*{\subsubsection}{0pt}{1.2ex plus 1ex minus .2ex}{0.6ex plus .2ex}
+
+% Centered Title block formatting
+\usepackage{titling}
+\pretitle{\begin{center}\fontsize{18}{22}\bfseries\color{black}}
+\posttitle{\par\end{center}\vskip 0.5em}
+\preauthor{\begin{center}\fontsize{12}{15}\color{black}}
+\postauthor{\par\end{center}\vskip 0.2em}
+\predate{\begin{center}\fontsize{11}{14}\color{black}}
+\postdate{\par\end{center}\vskip 1.5em}

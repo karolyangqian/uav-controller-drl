@@ -1,0 +1,82 @@
+<mujoco model="quadrotor_x">
+  <compiler angle="degree" coordinate="local" inertiafromgeom="true"/>
+  <option timestep="0.002" gravity="0 0 -9.81" density="1.2" viscosity="0.00002">
+    <flag contact="enable"/>
+  </option>
+
+  <default>
+    <geom friction="0.8 0.1 0.1"/>
+    <motor ctrllimited="true" ctrlrange="0 4.5"/>
+  </default>
+
+  <asset>
+    <texture type="skybox" builtin="gradient" rgb1="0.4 0.6 0.8" rgb2="0.1 0.15 0.2" width="512" height="512"/>
+    <texture name="grid" type="2d" builtin="checker" rgb1="0.9 0.9 0.9" rgb2="0.7 0.7 0.7" width="512" height="512" mark="edge" markrgb="0.4 0.4 0.4"/>
+    <material name="grid_mat" texture="grid" texrepeat="20 20" reflectance="0.1"/>
+    <material name="carbon" rgba="0.15 0.15 0.15 1.0" specular="0.4" shininess="0.5"/>
+    <material name="arm_front" rgba="0.9 0.2 0.1 1.0" specular="0.5" shininess="0.5"/>
+    <material name="arm_rear" rgba="0.2 0.2 0.2 1.0" specular="0.5" shininess="0.5"/>
+    <material name="prop_front" rgba="0.9 0.3 0.1 0.7"/>
+    <material name="prop_rear" rgba="0.2 0.2 0.2 0.7"/>
+    <material name="target_mat" rgba="0.1 0.8 0.2 0.5"/>
+  </asset>
+
+  <worldbody>
+    <light directional="true" pos="0 0 5" dir="0 0 -1" diffuse="0.8 0.8 0.8" specular="0.2 0.2 0.2"/>
+    <geom name="ground" type="plane" size="20 20 0.1" material="grid_mat"/>
+
+    <!-- Visual Target Marker (Mocap body: no collisions, movable via code) -->
+    <body name="target" mocap="true" pos="0 0 1.5">
+      <geom type="sphere" size="0.08" material="target_mat" contype="0" conaffinity="0"/>
+    </body>
+
+    <!-- Quadrotor Main Body -->
+    <!-- Dimensions: arm length = 0.15m (diagonal 0.3m). Mass = 0.8kg -->
+    <body name="quadrotor" pos="0 0 1.5">
+      <freejoint name="root"/>
+
+      <!-- Center Hub -->
+      <geom name="fuselage" type="cylinder" size="0.06 0.02" mass="0.4" material="carbon"/>
+
+      <!-- Front-Right Arm (Red/Orange, 45 deg) -->
+      <!-- x = +0.10607, y = -0.10607 -->
+      <geom name="arm_fr" type="capsule" fromto="0 0 0  0.10607 -0.10607 0" size="0.007" mass="0.05" material="arm_front"/>
+      <geom name="motor_fr" type="cylinder" pos="0.10607 -0.10607 0.015" size="0.015 0.01" mass="0.03" material="carbon"/>
+      <geom name="prop_fr" type="cylinder" pos="0.10607 -0.10607 0.025" size="0.06 0.002" mass="0.01" material="prop_front" contype="0" conaffinity="0"/>
+      <site name="rotor0" pos="0.10607 -0.10607 0.025"/>
+
+      <!-- Front-Left Arm (Red/Orange, 45 deg) -->
+      <!-- x = +0.10607, y = +0.10607 -->
+      <geom name="arm_fl" type="capsule" fromto="0 0 0  0.10607 0.10607 0" size="0.007" mass="0.05" material="arm_front"/>
+      <geom name="motor_fl" type="cylinder" pos="0.10607 0.10607 0.015" size="0.015 0.01" mass="0.03" material="carbon"/>
+      <geom name="prop_fl" type="cylinder" pos="0.10607 0.10607 0.025" size="0.06 0.002" mass="0.01" material="prop_front" contype="0" conaffinity="0"/>
+      <site name="rotor1" pos="0.10607 0.10607 0.025"/>
+
+      <!-- Rear-Left Arm (Black, 45 deg) -->
+      <!-- x = -0.10607, y = +0.10607 -->
+      <geom name="arm_rl" type="capsule" fromto="0 0 0 -0.10607 0.10607 0" size="0.007" mass="0.05" material="arm_rear"/>
+      <geom name="motor_rl" type="cylinder" pos="-0.10607 0.10607 0.015" size="0.015 0.01" mass="0.03" material="carbon"/>
+      <geom name="prop_rl" type="cylinder" pos="-0.10607 0.10607 0.025" size="0.06 0.002" mass="0.01" material="prop_rear" contype="0" conaffinity="0"/>
+      <site name="rotor2" pos="-0.10607 0.10607 0.025"/>
+
+      <!-- Rear-Right Arm (Black, 45 deg) -->
+      <!-- x = -0.10607, y = -0.10607 -->
+      <geom name="arm_rr" type="capsule" fromto="0 0 0 -0.10607 -0.10607 0" size="0.007" mass="0.05" material="arm_rear"/>
+      <geom name="motor_rr" type="cylinder" pos="-0.10607 -0.10607 0.015" size="0.015 0.01" mass="0.03" material="carbon"/>
+      <geom name="prop_rr" type="cylinder" pos="-0.10607 -0.10607 0.025" size="0.06 0.002" mass="0.01" material="prop_rear" contype="0" conaffinity="0"/>
+      <site name="rotor3" pos="-0.10607 -0.10607 0.025"/>
+    </body>
+  </worldbody>
+
+  <!-- Actuators: 4 motors providing thrust (Z) and reaction yaw torque (around Z) -->
+  <!-- gear = "fx fy fz tx ty tz" in local site frame -->
+  <!-- km = 0.016 m: yaw torque per unit thrust -->
+  <!-- Rotors 0 & 2 spin CCW (negative yaw reaction torque on frame) -->
+  <!-- Rotors 1 & 3 spin CW  (positive yaw reaction torque on frame) -->
+  <actuator>
+    <motor name="motor_0" site="rotor0" gear="0 0 1  0 0 -0.016"/>
+    <motor name="motor_1" site="rotor1" gear="0 0 1  0 0  0.016"/>
+    <motor name="motor_2" site="rotor2" gear="0 0 1  0 0 -0.016"/>
+    <motor name="motor_3" site="rotor3" gear="0 0 1  0 0  0.016"/>
+  </actuator>
+</mujoco>
