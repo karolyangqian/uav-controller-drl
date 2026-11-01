@@ -40,4 +40,5 @@ tb_logs/
 
 # MuJoCo / Video recordings
 *.mp4
+!media/*.mp4
 *.avi
